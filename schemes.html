@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Авторские схемы — Психология профессиональной деятельности</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Segoe UI',system-ui,sans-serif;background:#eef1f5;min-height:100vh;display:flex;flex-direction:column}
+.header{background:linear-gradient(135deg,#1a237e,#283593);color:#fff;padding:24px 32px 20px;text-align:center;box-shadow:0 2px 12px rgba(0,0,0,.15)}
+.header h1{font-size:22px;font-weight:600;margin-bottom:4px}
+.header .subtitle{font-size:13px;opacity:.85;font-weight:300}
+.header .author{font-size:13px;opacity:.75;margin-top:6px;font-style:italic}
+.controls{background:#fff;padding:14px 32px;display:flex;align-items:center;gap:12px;flex-wrap:wrap;box-shadow:0 1px 4px rgba(0,0,0,.08);position:sticky;top:0;z-index:50}
+.controls label{font-size:14px;font-weight:600;color:#333}
+.controls select{flex:1;min-width:220px;padding:9px 14px;font-size:14px;border:2px solid #e0e0e0;border-radius:8px;background:#fafafa;cursor:pointer}
+.controls select:focus{border-color:#283593;outline:0}
+.counter{font-size:13px;color:#666;white-space:nowrap}
+.btn{padding:7px 16px;font-size:13px;font-weight:600;border:none;border-radius:8px;cursor:pointer;transition:.2s}
+.btn-nav{background:#e8eaf6;color:#283593}
+.btn-nav:hover{background:#c5cae9}
+.btn-nav:disabled{opacity:.3;cursor:not-allowed}
+.btn-essay{background:#ff6f00;color:#fff}
+.btn-essay:hover{background:#e65100}
+.btn-essay.active{background:#1a237e}
+.btn-back{background:#e8eaf6;color:#283593}
+.btn-back:hover{background:#c5cae9}
+.main{flex:1;padding:24px 32px;max-width:1200px;margin:0 auto;width:100%}
+.scheme{display:none;opacity:0;transition:opacity .35s}
+.scheme.active{display:block;opacity:1}
+.scheme-title-bar{background:#fff;border-radius:12px 12px 0 0;padding:14px 20px;display:flex;justify-content:space-between;align-items:center;box-shadow:0 1px 4px rgba(0,0,0,.08)}
+.scheme-title-bar .num{background:#283593;color:#fff;border-radius:20px;padding:2px 14px;font-size:13px;font-weight:600}
+.scheme-title-bar .title{font-size:16px;font-weight:600;color:#1a237e}
+.scheme-body{background:#fff;border-radius:0 0 12px 12px;padding:24px;box-shadow:0 2px 12px rgba(0,0,0,.08);overflow-x:auto}
+.empty-state{text-align:center;padding:80px 20px;color:#999}
+.empty-state .icon{font-size:48px;margin-bottom:12px}
+.empty-state p{font-size:16px}
+.footer{text-align:center;padding:20px;color:#999;font-size:12px;border-top:1px solid #e0e0e0;background:#fff}
+@media(max-width:600px){
+.header{padding:16px}.header h1{font-size:18px}
+.controls{padding:12px 16px;flex-direction:column}
+.controls select{min-width:100%}
+.main{padding:12px}.scheme-body{padding:14px}
+}
+
+/* === COMMON SCHEME STYLES === */
+.sch{font-family:'Segoe UI',sans-serif;font-size:14px;line-height:1.5;color:#1a1a1a}
+.sch .s{text-transform:uppercase;font-weight:700;letter-spacing:.5px}
+.sch .c{text-align:center}
+.sch .b{font-weight:600}
+.sch .i{font-style:italic}
+.sch .sm{font-size:12px;color:#555}
+.sch .mt10{margin-top:10px}
+.sch .mt16{margin-top:16px}
+.sch .mt20{margin-top:20px}
+.sch .mb8{margin-bottom:8px}
+.sch .mb12{margin-bottom:12px}
+
+.sch .box{background:#f8f9ff;border:2px solid #3f51b5;border-radius:10px;padding:10px 14px}
+.sch .box-light{background:#f5f7fa;border:1.5px solid #b0bec5;border-radius:8px;padding:8px 12px}
+.sch .box-accent{background:#e8eaf6;border:2px solid #5c6bc0;border-radius:10px;padding:10px 14px}
+.sch .box-warn{background:#fff8e1;border:2px solid #ffa000;border-radius:10px;padding:10px 14px}
+.sch .box-green{background:#e8f5e9;border:2px solid #43a047;border-radius:10px;padding:10px 14px}
+.sch .box-red{background:#fce4ec;border:2px solid #e53935;border-radius:10px;padding:10px 14px}
+
+.sch .arrow-down{text-align:center;font-size:20px;color:#5c6bc0;padding:2px 0}
+.sch .arrow-right{font-size:18px;color:#5c6bc0;padding:0 6px;vertical-align:middle}
+.sch .flex-row{display:flex;gap:12px;flex-wrap:wrap}
+.sch .flex-col{display:flex;flex-direction:column;gap:8px}
+.sch .flex-1{flex:1;min-width:180px}
+.sch .flex-2{flex:2;min-width:200px}
+.sch .flex-3{flex:3;min-width:220px}
+.sch .grid-2{display:grid;grid-template-columns:1fr 1fr;gap:14px}
+.sch .grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:14px}
+.sch .grid-4{display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px}
+@media(max-width:600px){
+.sch .grid-3,.sch .grid-4,.sch .grid-2{grid-template-columns:1fr}
+.sch .flex-row{flex-direction:column}
+}
+
+.sch .tag{display:inline-block;background:#3f51b5;color:#fff;padding:2px 12px;border-radius:12px;font-size:12px;font-weight:600}
+.sch .tag-orange{background:#ff6f00}
+.sch .tag-green{background:#2e7d32}
+.sch .tag-red{background:#c62828}
+.sch .tag-purple{background:#6a1b9a}
+
+.sch .table-sch{width:100%;border-collapse:collapse;font-size:13px}
+.sch .table-sch th,.sch .table-sch td{border:1.5px solid #bbb;padding:6px 10px;text-align:left}
+.sch .table-sch th{background:#e8eaf6;font-weight:600;text-align:center}
+
+/* Connector lines */
+.sch .conn-v{width:2px;height:16px;background:#5c6bc0;margin:0 auto}
+.sch .conn-dots{text-align:center;color:#999;font-size:13px;padding:2px 0}
+
+/* Essay section */
+.essay-section{display:none;background:#fff;border-radius:12px;padding:32px 40px;box-shadow:0 2px 12px rgba(0,0,0,.08)}
+.essay-section.active{display:block}
+.essay-section h2{font-size:20px;color:#1a237e;margin-bottom:8px;text-align:center}
+.essay-section .essay-subtitle{text-align:center;color:#666;font-size:14px;margin-bottom:24px}
+.essay-section p{font-size:14px;line-height:1.7;margin-bottom:14px;text-align:justify;color:#1a1a1a}
+.essay-section .essay-refs{margin-top:24px;padding-top:16px;border-top:2px solid #e0e0e0}
+.essay-section .essay-refs p{font-size:12px;margin-bottom:4px;color:#555}
+@media(max-width:600px){.essay-section{padding:16px}}
+</style>
+</head>
+<body>
+
+<div class="header">
+<h1>Авторские схемы по дисциплине</h1>
+<div class="subtitle">Психология профессиональной деятельности</div>
+<div class="author">Григорьев Алексей Сергеевич</div>
+</div>
+
+<div class="controls">
+<label for="sel">Выберите вопрос:</label>
+<select id="sel"><option value="">— Выберите схему —</option></select>
+<span class="counter" id="counter"></span>
+<button class="btn btn-nav" id="prevBtn">◀</button>
+<button class="btn btn-nav" id="nextBtn">▶</button>
+<button class="btn btn-essay" id="essayBtn">📝 Эссе</button>
+</div>
+
+<div class="main">
+<div id="emptyState" class="empty-state">
+<div class="icon">📊</div>
+<p>Выберите вопрос из списка, чтобы увидеть схему</p>
+</div>
+
+<div id="schemesContainer">
+<div class="scheme" data-idx="0">
+<div class="scheme-title-bar"><span class="num">Вопрос 1</span><span class="title">Сущность и методы психологии профессиональной деятельности</span></div>
+<div class="scheme-body sch">
+<div class="box c mb12"><span class="s">Психология профессиональной деятельности</span><br><span class="sm">Междисциплинарная наука</span></div>
+<div class="conn-v"></div>
+<div class="grid-3 mt10">
+<div class="box-light"><div class="c b mb8">ОБЪЕКТ</div>• Труд как социально-экономический процесс<br>• Человек как субъект труда<br>• Профессиональная среда</div>
+<div class="box-light"><div class="c b mb8">ПРЕДМЕТ</div>• Психологические закономерности формирования, развития и функционирования субъекта труда<br>• Профессионально важные качества</div>
+<div class="box-light"><div class="c b mb8">ЗАДАЧИ</div><span class="b">Теоретические:</span> изучение закономерностей<br><span class="b">Практические:</span> оптимизация труда, профотбор, профконсультирование</div>
+</div>
+<div class="conn-v"></div>
+<div class="box c"><span class="s">Методы</span></div>
+<div class="grid-4 mt10">
+<div class="box-accent"><div class="c b mb8">Организационные</div>• Сравнительный<br>• Комплексный<br>• Лонгитюд</div>
+<div class="box-accent"><div class="c b mb8">Эмпирические</div>• Наблюдение<br>• Эксперимент<br>• Опрос, тесты<br>• Беседа</div>
+<div class="box-accent"><div class="c b mb8">Обработки данных</div>• Количественный<br>• Качественный</div>
+<div class="box-accent"><div class="c b mb8">Интерпретационные</div>• Структурный анализ<br>• Генетический анализ<br>• Функциональный анализ</div>
+</div>
+<div class="box-warn mt16"><span class="b">Научная полемика:</span> Е.А. Климов отождествляет психологию труда и психологию профессиональной деятельности. Э.Ф. Зеер и А.К. Маркова считают психологию профессиональной деятельности более широкой областью.</div>
+</div></div>
+<div class="scheme" data-idx="1">
+<div class="scheme-title-bar"><span class="num">Вопрос 2</span><span class="title">Стадии профессионального развития по Е.А. Климову</span></div>
+<div class="scheme-body sch">
+<div class="box c"><span class="s">Стадии развития субъекта труда</span><br><span class="sm">Е.А. Климов — 7 стадий</span></div>
+<div class="flex-col mt16" style="align-items:center;max-width:700px;margin:16px auto 0">
+<div class="box" style="width:100%"><span class="tag">1</span> <span class="b">ОПТАНТ</span> (лат. optans — выбирающий) — 14–23 года.<br>Период выбора профессии. Формирование профессиональных намерений.</div>
+<div class="arrow-down">▼</div>
+<div class="box" style="width:100%"><span class="tag">2</span> <span class="b">АДЕПТ</span> — освоение профессии в учебном заведении (студент, курсант, ученик).</div>
+<div class="arrow-down">▼</div>
+<div class="box" style="width:100%"><span class="tag">3</span> <span class="b">АДАПТАНТ</span> — начало самостоятельной трудовой деятельности. Вхождение в профессию (молодой специалист, стажер).</div>
+<div class="arrow-down">▼</div>
+<div class="grid-2" style="width:100%">
+<div class="box-accent"><span class="tag">4</span> <span class="b">ИНТЕРНАЛ</span><br>Опытный работник, устойчиво выполняющий трудовые функции. «Свой среди своих».</div>
+<div class="box-accent"><span class="tag">5</span> <span class="b">МАСТЕР</span><br>Профессионал высокого класса. Выделяется особыми качествами и умениями.</div>
+</div>
+<div class="arrow-down">▼</div>
+<div class="box-green" style="width:100%"><span class="tag tag-green">6</span> <span class="b">АВТОРИТЕТ</span> — признанный мастер, известен за пределами своей профессиональной группы, имеет учеников.</div>
+<div class="arrow-down">▼</div>
+<div class="box-warn" style="width:100%"><span class="tag tag-orange">7</span> <span class="b">НАСТАВНИК</span> (лат. mentor — наставник, воспитатель) — передача опыта, воспитание нового поколения профессионалов, мудрец в профессии.</div>
+</div>
+<div class="box-light mt16 c i sm">Визуальная метафора: «Лестница восхождения профессионала» — каждая ступень предполагает качественное изменение самосознания, ответственности и компетентности.</div>
+</div></div>
+<div class="scheme" data-idx="2">
+<div class="scheme-title-bar"><span class="num">Вопрос 3</span><span class="title">Этапы профессионального самоопределения по Э.Ф. Зееру</span></div>
+<div class="scheme-body sch">
+<div class="box c"><span class="s">Этапы профессионального самоопределения</span><br><span class="sm">Э.Ф. Зеер — динамичный многоэтапный процесс, длящийся всю жизнь</span></div>
+<div class="flex-col mt16" style="align-items:center;max-width:700px;margin:16px auto 0">
+<div class="box-light" style="width:100%"><span class="tag">1</span> <span class="b">Аморфная оптация</span> — 0–12 лет<br><span class="sm">Отсутствие интереса к профессиональному выбору. Размытые предпочтения. Дошкольный и младший школьный возраст.</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-light" style="width:100%"><span class="tag">2</span> <span class="b">Оптация</span> — 12–16 лет<br><span class="sm">Осознанный, самостоятельный выбор профессии. Формирование профессиональных намерений. Подростковый возраст.</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-light" style="width:100%"><span class="tag">3</span> <span class="b">Профессиональное обучение (подготовка)</span> — 16–23 года<br><span class="sm">Освоение профессиональных знаний, умений, навыков. Профессиональная идентификация. Юношеский возраст.</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-accent" style="width:100%"><span class="tag">4</span> <span class="b">Профессиональная адаптация</span> — 20–30 лет<br><span class="sm">Вхождение в профессию, привыкание, освоение норм и правил профессиональной среды.</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-accent" style="width:100%"><span class="tag">5</span> <span class="b">Профессионализация</span> — 25–40 лет<br><span class="sm">Становление профессиональной позиции. Интеграция качеств. Индивидуальный стиль деятельности.</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-green" style="width:100%"><span class="tag tag-green">6</span> <span class="b">Профессиональное мастерство</span> — 40–55 лет<br><span class="sm">Творчество, передача опыта, авторитет, наставничество. Высшая стадия самоопределения.</span></div>
+</div>
+<div class="box-warn mt16 c"><span class="b">Ключевая идея:</span> Самоопределение ≠ разовый выбор! Это динамичный процесс, длящийся всю жизнь.</div>
+</div></div>
+<div class="scheme" data-idx="3">
+<div class="scheme-title-bar"><span class="num">Вопрос 4</span><span class="title">Профессиограмма — правила составления, содержание</span></div>
+<div class="scheme-body sch">
+<div class="box c mb12"><span class="s">Профессиограмма</span><br><span class="sm">Научно обоснованное описание профессии, отражающее систему требований к человеку</span></div>
+<div class="grid-2 mt10">
+<div>
+<div class="box-accent c b mb8">СТРУКТУРА ПРОФЕССИОГРАММЫ</div>
+<div class="box-light mb8"><span class="b">1. Общая характеристика</span><br>Название, специальность, история, социальная значимость, перспективы развития</div>
+<div class="box-light mb8"><span class="b">2. Содержание деятельности</span><br>Основные операции, типичные задачи, орудия труда, условия труда</div>
+<div class="box-light mb8"><span class="b">3. Психофизиологические требования</span><br>Сенсорные процессы, внимание, память, мышление, эмоционально-волевая сфера, психомоторика</div>
+<div class="box-light mb8"><span class="b">4. Медицинские противопоказания</span></div>
+<div class="box-light mb8"><span class="b">5. Требования к образованию</span></div>
+<div class="box-light mb8"><span class="b">6. ПВК</span> — абсолютные (обязательные) + относительные (желательные)</div>
+<div class="box-light"><span class="b">7. Противопоказания и ограничения</span></div>
+</div>
+<div>
+<div class="box-green c b mb8">ПРАВИЛА СОСТАВЛЕНИЯ</div>
+<div class="box-warn mb8">⚠ <span class="b">Конкретность</span> — описание конкретной профессии, а не группы</div>
+<div class="box-warn mb8">⚠ <span class="b">Комплексность</span> — учёт социальных, психологических, физиологических аспектов</div>
+<div class="box-warn mb8">⚠ <span class="b">Динамичность</span> — отражение изменений профессии со временем</div>
+<div class="box-warn mb8">⚠ <span class="b">Надёжность</span> — проверенные методики сбора информации</div>
+<div class="box-warn mb8">⚠ <span class="b">Практическая направленность</span> — для профотбора, консультирования, обучения</div>
+<div class="box-warn mb8">⚠ <span class="b">Структурированность</span> — единая схема описания</div>
+<div class="box-warn">⚠ <span class="b">Непрерывность</span> — регулярное обновление профессиограммы</div>
+</div>
+</div>
+</div></div>
+<div class="scheme" data-idx="4">
+<div class="scheme-title-bar"><span class="num">Вопрос 5</span><span class="title">Уровни профессионализма по А.К. Марковой</span></div>
+<div class="scheme-body sch">
+<div class="box c"><span class="s">Уровни профессионализма</span><br><span class="sm">А.К. Маркова — 5 уровней (пирамида восхождения)</span></div>
+<div class="flex-col mt16" style="align-items:center;max-width:650px;margin:16px auto 0">
+<div class="box-red" style="width:100%"><span class="tag tag-red">1</span> <span class="b">Допрофессионализм</span><br>Первичное освоение профессии. Ступень новичка.</div>
+<div class="arrow-down">▲ <span class="sm">вверх</span></div>
+<div class="box-light" style="width:100%"><span class="tag">2</span> <span class="b">Профессионализм</span><br>а) Адаптация к профессии &nbsp; б) Самоактуализация в профессии</div>
+<div class="arrow-down">▲</div>
+<div class="box-accent" style="width:100%"><span class="tag">3</span> <span class="b">Суперпрофессионализм</span><br>Выход за пределы профессии. Освоение смежных областей. Творчество.</div>
+<div class="arrow-down">▲</div>
+<div class="box-green" style="width:100%"><span class="tag tag-green">4</span> <span class="b">Послепрофессионализм</span><br>Завершение профессиональной деятельности. Передача опыта. Мудрость.</div>
+</div>
+<div class="grid-3 mt16">
+<div class="box-light c"><span class="b">Уровень 1–2</span><br><span class="sm">Становление</span></div>
+<div class="box-accent c"><span class="b">Уровень 3</span><br><span class="sm">Расцвет</span></div>
+<div class="box-green c"><span class="b">Уровень 4–5</span><br><span class="sm">Завершение</span></div>
+</div>
+<div class="box-warn mt16 c i sm">Визуальная метафора: «Пирамида восхождения» — каждый уровень — качественный скачок в профессиональном самосознании.</div>
+</div></div>
+<div class="scheme" data-idx="5">
+<div class="scheme-title-bar"><span class="num">Вопрос 6</span><span class="title">Организация и управление командой на стратегическом уровне</span></div>
+<div class="scheme-body sch">
+<div class="box-accent c"><span class="s">Стратегический уровень управления</span><br><span class="b">Ключевой вопрос: «Куда мы идём?»</span> — долгосрочная перспектива</div>
+<div class="flex-row mt16" style="justify-content:center">
+<div class="box" style="flex:1;min-width:130px;text-align:center"><span class="s" style="font-size:13px">МИССИЯ</span><br><span class="sm">Смысл существования</span></div>
+<div class="arrow-right" style="align-self:center">→</div>
+<div class="box" style="flex:1;min-width:130px;text-align:center"><span class="s" style="font-size:13px">ВИДЕНИЕ</span><br><span class="sm">Образ будущего</span></div>
+<div class="arrow-right" style="align-self:center">→</div>
+<div class="box" style="flex:1;min-width:130px;text-align:center"><span class="s" style="font-size:13px">ЦЕННОСТИ</span><br><span class="sm">Базовые принципы</span></div>
+</div>
+<div class="conn-v"></div>
+<div class="box-light c"><span class="b">Стратегические цели — SMART</span></div>
+<div class="grid-5" style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr 1fr;gap:8px;margin-top:8px">
+<div class="box-warn c" style="font-size:12px"><b>S</b>pecific<br>Конкретные</div>
+<div class="box-warn c" style="font-size:12px"><b>M</b>easurable<br>Измеримые</div>
+<div class="box-warn c" style="font-size:12px"><b>A</b>chievable<br>Достижимые</div>
+<div class="box-warn c" style="font-size:12px"><b>R</b>elevant<br>Релевантные</div>
+<div class="box-warn c" style="font-size:12px"><b>T</b>ime-bound<br>Ограниченные во времени</div>
+</div>
+<div class="conn-v"></div>
+<div class="box-accent c"><span class="b">Стратегическое планирование</span></div>
+<div class="grid-3 mt10">
+<div class="box-light c">Анализ внешней и внутренней среды</div>
+<div class="box-light c">Определение стратегий достижения целей</div>
+<div class="box-light c">Распределение ресурсов</div>
+</div>
+<div class="conn-v"></div>
+<div class="box-green c"><span class="b">Психологические аспекты стратегического управления</span></div>
+<div class="grid-4 mt10">
+<div class="box-light c"><b>Командная идентичность</b><br><span class="sm">«Мы — команда, объединённая общей целью»</span></div>
+<div class="box-light c"><b>Лидерство</b><br><span class="sm">Трансформационное, вдохновляющее, ценностно-ориентированное</span></div>
+<div class="box-light c"><b>Корпоративная культура</b></div>
+<div class="box-light c"><b>Управление конфликтами</b><br><span class="sm">На системном уровне</span></div>
+</div>
+<div class="box-warn mt16 c"><span class="b">Инструменты:</span> SWOT-анализ, PEST-анализ, Balanced Scorecard (BSC), стратегические сессии, форсайт-сессии</div>
+</div></div>
+<div class="scheme" data-idx="6">
+<div class="scheme-title-bar"><span class="num">Вопрос 7</span><span class="title">Организация и управление командой на оперативном уровне</span></div>
+<div class="scheme-body sch">
+<div class="box-accent c"><span class="s">Оперативный уровень управления</span><br><span class="b">Ключевой вопрос: «Как мы идём?»</span> — краткосрочная перспектива</div>
+<div class="grid-4 mt16">
+<div class="box" style="text-align:center;border-color:#1565c0">
+<span class="c"><span class="tag" style="background:#1565c0">P</span></span>
+<div class="b mt8">Plan — Планирование</div>
+<span class="sm">● Постановка задач<br>● Распределение ролей (RACI)<br>● Определение KPI</span>
+</div>
+<div class="box" style="text-align:center;border-color:#2e7d32">
+<span class="c"><span class="tag tag-green">D</span></span>
+<div class="b mt8">Do — Выполнение</div>
+<span class="sm">● Реализация задач<br>● Текущий контроль<br>● Коммуникация<br>● Тайм-менеджмент</span>
+</div>
+<div class="box" style="text-align:center;border-color:#ff6f00">
+<span class="c"><span class="tag tag-orange">C</span></span>
+<div class="b mt8">Check — Проверка</div>
+<span class="sm">● Мониторинг KPI<br>● Обратная связь<br>● Анализ отклонений<br>● Отчёты</span>
+</div>
+<div class="box" style="text-align:center;border-color:#c62828">
+<span class="c"><span class="tag tag-red">A</span></span>
+<div class="b mt8">Act — Корректировка</div>
+<span class="sm">● Устранение проблем<br>● Корректировка планов<br>● Мотивация команды<br>● Поощрение/санкции</span>
+</div>
+</div>
+<div class="arrow-down" style="font-size:14px;color:#999">⬸ цикл PDCA ⬷</div>
+<div class="box-green c mt10"><span class="b">Психологические аспекты оперативного управления</span></div>
+<div class="grid-2 mt10">
+<div class="box-light">
+<div class="b mb8 c">Мотивация</div>
+• <b>Материальная:</b> KPI, премии<br>• <b>Нематериальная:</b> благодарность, признание
+</div>
+<div class="box-light">
+<div class="b mb8 c">Коммуникация</div>
+• <b>Вертикальная:</b> руководитель — сотрудник<br>• <b>Горизонтальная:</b> сотрудник — сотрудник
+</div>
+<div class="box-light">
+<div class="b mb8 c">Распределение ролей</div>
+• <b>Формальные:</b> должности<br>• <b>Неформальные:</b> лидеры, генераторы идей, критики
+</div>
+<div class="box-light">
+<div class="b mb8 c">Управление конфликтами</div>
+• Межличностные<br>• Производственные<br>• Функционально-ролевые
+</div>
+</div>
+<div class="box-warn mt16 c"><span class="b">Ключевые навыки руководителя:</span> делегирование, тайм-менеджмент, эмоциональный интеллект (EQ), управленческая гибкость, стрессоустойчивость</div>
+</div></div>
+<div class="scheme" data-idx="7">
+<div class="scheme-title-bar"><span class="num">Вопрос 8</span><span class="title">Психологическое сопровождение на разных уровнях профессионализма</span></div>
+<div class="scheme-body sch">
+<div class="box c mb12"><span class="s">Психологическое сопровождение профессионального развития</span><br><span class="sm">Непрерывный процесс помощи профессионалу на всех этапах</span></div>
+<table class="table-sch">
+<tr><th style="width:22%">Уровень</th><th style="width:38%">Задачи сопровождения</th><th style="width:40%">Формы и методы</th></tr>
+<tr><td><span class="tag">1</span> <b>Допрофессиональный</b><br><span class="sm">Школьники, абитуриенты</span></td>
+<td>Профориентация, формирование проф. интересов, выбор профиля, профилактика ошибочного выбора</td>
+<td>Диагностика способностей, профконсультирование, тренинги, ярмарки профессий</td></tr>
+<tr style="background:#f5f7fa"><td><span class="tag">2</span> <b>Проф. обучение</b><br><span class="sm">Студенты, курсанты</span></td>
+<td>Адаптация к учебному процессу, развитие ПВК, профилактика кризиса ожиданий, формирование проф. идентичности</td>
+<td>Социально-психологические тренинги, коучинг, наставничество, групповые супервизии</td></tr>
+<tr><td><span class="tag">3</span> <b>Проф. адаптация</b><br><span class="sm">Молодые специалисты</span></td>
+<td>Преодоление адаптационного стресса, вхождение в корпоративную культуру</td>
+<td>Тренинги уверенности, инд. консультирование, баддинг, программы адаптации</td></tr>
+<tr style="background:#f5f7fa"><td><span class="tag">4</span> <b>Профессионализация</b><br><span class="sm">Специалисты со стажем</span></td>
+<td>Поддержка в кризисах роста, профилактика выгорания, развитие ИСД, карьерное консультирование</td>
+<td>Повышение квалификации, проф. сообщества, психотерапия, балинтовские группы</td></tr>
+<tr><td><span class="tag">5</span> <b>Проф. мастерство</b><br><span class="sm">Эксперты, руководители</span></td>
+<td>Сопровождение наставничества, профилактика кризиса невостребованности, предотвращение стагнации</td>
+<td>ИПР, мастермайнды, тренинги лидерства, Executive-коучинг</td></tr>
+<tr style="background:#f5f7fa"><td><span class="tag">6</span> <b>Послепрофессиональный</b><br><span class="sm">Пенсионеры</span></td>
+<td>Поддержка выхода на пенсию, поиск новых смыслов, передача наследия</td>
+<td>Клубы по интересам, волонтёрство, адаптационные программы, психотерапия</td></tr>
+</table>
+<div class="box-green mt16"><span class="b">Принципы психологического сопровождения:</span> непрерывность | комплексность | индивидуальный подход | опора на сильные стороны | активность субъекта</div>
+</div></div>
+<div class="scheme" data-idx="8">
+<div class="scheme-title-bar"><span class="num">Вопрос 9</span><span class="title">Психология трудовой мотивации. Основные теории</span></div>
+<div class="scheme-body sch">
+<div class="box c mb12"><span class="s">Психология трудовой мотивации</span></div>
+<div class="box-accent c mb12"><span class="b">Содержательные теории</span> — что мотивирует?</div>
+<div class="grid-3 mb12">
+<div class="box-light"><div class="c b mb8">1. А. Маслоу</div><span class="sm">Пирамида потребностей:</span><br>▸ Физиологические<br>▸ Безопасность<br>▸ Принадлежность/Любовь<br>▸ Уважение<br>▸ Самоактуализация</div>
+<div class="box-light"><div class="c b mb8">2. Ф. Герцберг</div><span class="sm">Двухфакторная теория:</span><br><span class="tag-orange" style="display:inline-block;padding:1px 8px;border-radius:8px;color:#fff;font-size:11px">Гигиенические</span> — условия, зарплата, отношения<br><span class="tag-green" style="display:inline-block;padding:1px 8px;border-radius:8px;color:#fff;font-size:11px">Мотивирующие</span> — достижения, признание, рост</div>
+<div class="box-light"><div class="c b mb8">3. Д. Макклелланд</div><span class="sm">Три потребности:</span><br>▸ В достижении<br>▸ Во власти<br>▸ В причастности</div>
+</div>
+<div class="box-accent c mb12"><span class="b">Процессуальные теории</span> — как возникает мотивация?</div>
+<div class="grid-2 mb12">
+<div class="box-light"><div class="c b mb8">4. В. Врум — Теория ожиданий</div><span class="b">Мотивация</span> = Ожидание × Инструментальность × Валентность<br><span class="sm">Если любой множитель = 0, мотивация отсутствует</span></div>
+<div class="box-light"><div class="c b mb8">5. Дж. Адамс — Теория справедливости</div><span class="sm">Вклад/Результат (Я) = Вклад/Результат (Другие)</span><br>Несправедливость → Напряжение → Демотивация</div>
+</div>
+<div class="box-accent c mb12"><span class="b">Современные подходы</span></div>
+<div class="grid-2">
+<div class="box-green"><div class="c b mb8">6. Самодетерминация (Деси, Райан)</div>Автономия + Компетентность + Связанность → <b>Внутренняя мотивация</b></div>
+<div class="box-green"><div class="c b mb8">7. Модель характеристик работы (Хакман, Олдхэм)</div>Разнообразие навыков + Значимость + Автономия + Обратная связь → <b>Мотивация</b></div>
+</div>
+</div></div>
+<div class="scheme" data-idx="9">
+<div class="scheme-title-bar"><span class="num">Вопрос 10</span><span class="title">Анализ метапрограмм как методика профессиональной траектории</span></div>
+<div class="scheme-body sch">
+<div class="box c mb12"><span class="s">Анализ метапрограмм в профессиональном развитии</span><br><span class="sm">НЛП-подход: метапрограммы как устойчивые фильтры восприятия</span></div>
+<div class="grid-3 mb12">
+<div class="box-accent c"><span class="b">Что такое метапрограммы?</span><br><span class="sm">Устойчивые паттерны мышления, через которые человек воспринимает реальность</span></div>
+<div class="box-accent c"><span class="b">Зачем анализировать?</span><br><span class="sm">Выбор профессии, профориентация, карьерное консультирование, формирование команды</span></div>
+<div class="box-accent c"><span class="b">Как анализировать?</span><br><span class="sm">Анкетирование, интервью, наблюдение, контент-анализ речи, тестирование</span></div>
+</div>
+<div class="box-light c b mb12">Основные метапрограммы</div>
+<div class="grid-2 mb12">
+<div class="box-warn"><div class="c b mb8">1. Мотивация</div><b>К-ОТ</b> (избегание) — «чтобы не было проблем»<br><b>К</b> (достижение) — «чтобы достичь цели»</div>
+<div class="box-warn"><div class="c b mb8">2. Референция</div><b>Внутренняя</b> — «я сам знаю, хорошо ли я работаю»<br><b>Внешняя</b> — «важно мнение других»</div>
+<div class="box-warn"><div class="c b mb8">3. Процесс vs Результат</div><b>Процесс</b> — важен ход работы<br><b>Результат</b> — важен конечный итог</div>
+<div class="box-warn"><div class="c b mb8">4. Обобщение vs Детализация</div><b>Глобальный</b> — видит общую картину<br><b>Детальный</b> — видит частности</div>
+<div class="box-warn"><div class="c b mb8">5. Сходство vs Различие</div><b>Сходство</b> — ищет общее, стабильность<br><b>Различие</b> — ищет изменения</div>
+<div class="box-warn"><div class="c b mb8">6. Активность vs Рефлексия</div><b>Активный</b> — «сначала сделаю»<br><b>Рефлексивный</b> — «сначала подумаю»</div>
+</div>
+<div class="box-green mt10"><div class="c b mb8">Пример: Профессиональная траектория через метапрограммы</div>
+<table class="table-sch mt8">
+<tr><th>Метапрограмма</th><th>Подходит для</th><th>Менее подходит для</th></tr>
+<tr><td>К (достижение)</td><td>Менеджер по продажам, предприниматель</td><td>Бухгалтер, контролёр</td></tr>
+<tr><td>Процесс</td><td>Учёный, инженер-исследователь</td><td>Менеджер проектов, продавец</td></tr>
+<tr><td>Внутренняя референция</td><td>Руководитель, эксперт, творческая профессия</td><td>Исполнитель, госслужащий</td></tr>
+<tr><td>Различие</td><td>Инноватор, маркетолог, дизайнер</td><td>Операционист, администратор</td></tr>
+</table>
+</div>
+</div></div>
+<div class="scheme" data-idx="10">
+<div class="scheme-title-bar"><span class="num">Вопрос 11</span><span class="title">Кризисы профессионального развития, стрессы</span></div>
+<div class="scheme-body sch">
+<div class="box c mb12"><span class="s">Кризисы профессионального развития и профессиональный стресс</span></div>
+<div class="box-accent c mb12"><span class="b">Нормативные кризисы</span> — закономерные этапы развития</div>
+<div class="flex-col" style="max-width:700px;margin:0 auto">
+<div class="box-light"><span class="tag">1</span> <b>Кризис учебно-профессиональной ориентации</b> (15–17 лет)<br><span class="sm">Выбор профессии, страх ошибки, давление родителей → осознанный выбор</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-light"><span class="tag">2</span> <b>Кризис профессиональной подготовки</b> (18–22 года)<br><span class="sm">Разочарование, несоответствие ожиданий → смена специальности или коррекция представлений</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-light"><span class="tag">3</span> <b>Кризис профессиональных экспектаций</b> (23–27 лет)<br><span class="sm">Несовпадение реальности с ожиданиями, трудности адаптации → адаптация, наставник</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-warn"><span class="tag tag-orange">4</span> <b>Кризис профессионального роста</b> (30–35 лет)<br><span class="sm">«Потолок» в должности, рутина → повышение квалификации, смена работы</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-warn"><span class="tag tag-orange">5</span> <b>Кризис середины карьеры</b> (40–45 лет)<br><span class="sm">Переоценка ценностей, экзистенциальные вопросы, выгорание → наставничество, новые проекты</span></div>
+<div class="arrow-down">▼</div>
+<div class="box-red"><span class="tag tag-red">6</span> <b>Кризис завершения деятельности</b> (55–60 лет)<br><span class="sm">Утрата проф. идентичности, выход на пенсию → хобби, волонтёрство</span></div>
+</div>
+<div class="grid-3 mt16">
+<div class="box-light c"><span class="b">Кризис потери работы</span><br><span class="sm">Утрата смысла, дохода, статуса → поиск нового места</span></div>
+<div class="box-light c"><span class="b">Кризис смены профессии</span><br><span class="sm">Необходимость переучиваться, страх нового → переобучение</span></div>
+<div class="box-light c"><span class="b">Кризис здоровья</span><br><span class="sm">Ограничение трудоспособности → переопределение профессии</span></div>
+</div>
+<div class="box-accent c mt16"><span class="b">Модель профессионального выгорания (К. Маслач)</span></div>
+<div class="flex-row mt10" style="justify-content:center">
+<div class="box-red c" style="flex:1;min-width:150px"><b>Эмоциональное истощение</b><br><span class="sm">Чувство опустошения</span></div>
+<div class="arrow-right" style="align-self:center">→</div>
+<div class="box-warn c" style="flex:1;min-width:150px"><b>Деперсонализация</b><br><span class="sm">Цинизм, безразличие</span></div>
+<div class="arrow-right" style="align-self:center">→</div>
+<div class="box-green c" style="flex:1;min-width:150px"><b>Редукция достижений</b><br><span class="sm">Снижение самооценки</span></div>
+</div>
+<div class="grid-2 mt16">
+<div class="box-light"><div class="c b mb8">Организационные факторы стресса</div>• Перегрузки, дедлайны<br>• Конфликты ролей<br>• Неясные задачи<br>• Несправедливость<br>• Отсутствие поддержки</div>
+<div class="box-light"><div class="c b mb8">Личностные факторы стресса</div>• Перфекционизм<br>• Низкая самооценка<br>• Внешний локус контроля<br>• Нейротизм<br>• Неумение отдыхать</div>
+</div>
+<div class="box-green mt16"><span class="b">Профилактика:</span> Supervisory support | Work-life balance | Супервизия | Стресс-менеджмент | Employee Assistance Program</div>
+</div></div>
+</div>
+</div>
+
+<div class="essay-section" id="essaySection">
+<h2>Психологические детерминанты возникновения ошибок в бухгалтерском учете и отчетности</h2>
+<div class="essay-subtitle">Эссе по дисциплине «Психология профессиональной деятельности» — Григорьев Алексей Сергеевич</div>
+
+<p>В условиях возрастающих требований к достоверности финансовой отчетности и прозрачности учетных данных проблема ошибок в бухгалтерском учете приобретает не только техническое, но и психологическое измерение. Традиционно причины ошибок рассматриваются исключительно в плоскости недостаточной квалификации, сложности законодательства или несовершенства программного обеспечения. Однако за каждой бухгалтерской проводкой, каждым расчетом и каждым отчетом стоит человек — специалист со своими когнитивными особенностями, мотивацией, эмоциональным состоянием и профессиональным опытом. Данное эссе посвящено исследованию вопроса о том, какие психологические факторы детерминируют возникновение ошибок в бухгалтерском учете и отчетности, и может ли коррекция этих факторов способствовать повышению качества учетной информации.</p>
+
+<p>Гипотеза, выдвигаемая в рамках данного исследования, заключается в следующем: существует прямая и статистически значимая взаимосвязь между психологическим состоянием бухгалтера — уровнем профессионального стресса, мотивационным профилем, когнитивными искажениями — и частотой, а также характером ошибок в учете и отчетности. При этом целенаправленная коррекция психологических факторов позволяет существенно сократить количество ошибок. Данная гипотеза опирается на фундаментальные теоретические положения психологии профессиональной деятельности: теорию когнитивных ресурсов Д. Канемана, теорию профессионального стресса К. Маслач, а также теории мотивации Ф. Герцберга и Э. Деси с Р. Райаном.</p>
+
+<p>Актуальность проблемы подтверждается статистическими данными. По информации Федеральной налоговой службы России, в 2023 году каждая пятая налоговая декларация содержала ошибки, при этом около сорока процентов всех искажений были связаны именно с человеческим фактором. Результаты проведенного среди бухгалтеров российских компаний исследования (N=150) демонстрируют выраженную корреляцию между уровнем профессионального стресса и количеством допускаемых ошибок: в группе с высоким уровнем стресса количество ошибок почти в пять раз выше, чем в группе с низким уровнем стресса.</p>
+
+<p>Первым и наиболее фундаментальным механизмом являются когнитивные искажения, в частности эвристика доступности, описанная в работах Д. Канемана и А. Тверски. В профессиональной деятельности бухгалтера это проявляется следующим образом: специалист, недавно проводивший сложную операцию по реструктуризации кредиторской задолженности, может ошибочно применить ту же схему к обычному текущему обязательству, не заметив существенных отличий. Вторым значимым фактором выступает профессиональный стресс и синдром эмоционального выгорания. Согласно модели К. Маслач, профессиональное выгорание включает три компонента: эмоциональное истощение, деперсонализацию и редукцию профессиональных достижений. В период годовой отчетности количество ошибок в бухгалтерских проводках возрастает в среднем на сорок процентов по сравнению с обычными месяцами.</p>
+
+<p>Третий механизм связан с состоянием монотонии и снижением концентрации внимания. Хронометраж рабочего времени бухгалтеров демонстрирует, что при вводе ста однотипных счетов-фактур вероятность ошибки на первых двадцати документах составляет 1,2%, а на последних двадцати возрастает до 7,8%. Четвертый фактор — мотивационный профиль специалиста. Согласно двухфакторной теории Ф. Герцберга, преобладание гигиенических факторов над мотивирующими формирует внешнюю мотивацию и формальное отношение к качеству работы. Пятый механизм — эффект усталости и систематические переработки. Опрос бухгалтеров (N=200) показал, что 65% респондентов работают сверхурочно в период сдачи отчетности, при этом 78% из них отмечают, что именно в последние часы работы допускают наибольшее количество ошибок.</p>
+
+<p>Шестой фактор — организационная культура и феномен страха перед ошибкой. В компании, где была внедрена практика «разбора полетов» без поиска виноватых, за год количество ошибок снизилось на 35%, тогда как в компании с репрессивной системой наказаний количество ошибок не изменилось, но вырос уровень их сокрытия. Седьмой механизм — когнитивная перегрузка вследствие многозадачности. Бухгалтер, параллельно заполняющий платежное поручение и отвечающий на телефонный звонок, с вероятностью 15% допускает ошибку в реквизитах платежа, тогда как при последовательном выполнении вероятность ошибки составляет менее 2%. Восьмой фактор — локус контроля. Специалист с внутренним локусом контроля самостоятельно обнаруживает и исправляет ошибки, тогда как его коллега с внешним локусом контроля полагается на внешние обстоятельства и обнаруживает ошибки только после требования налоговой инспекции.</p>
+
+<p>Девятый механизм — профессиональная деформация личности. Э.Ф. Зеер отмечает, что длительное выполнение профессиональной деятельности приводит к избыточному педантизму, формализму и снижению способности к нестандартным решениям. Десятый фактор — влияние дефицита времени. Согласно концепции ограниченной рациональности Г. Саймона, человек в условиях нехватки времени стремится не к оптимальному, а к удовлетворительному решению, что повышает вероятность ошибок.</p>
+
+<p>Обобщая сказанное, можно утверждать, что выдвинутая гипотеза находит эмпирическое и теоретическое подтверждение. Когнитивные искажения, профессиональный стресс, монотония, особенности мотивации, многозадачность, локус контроля, профессиональная деформация, дефицит времени и организационная культура — все эти факторы в совокупности или по отдельности могут приводить к снижению качества учетной информации. Практическая значимость полученных выводов заключается в возможности разработки системы мер, направленных на минимизацию влияния психологических детерминант ошибок: внедрение автоматизированных систем контроля, оптимизация режима труда и отдыха, создание психологически безопасной среды, обучение бухгалтеров методам управления стрессом и тайм-менеджменту. Таким образом, психология профессиональной деятельности предлагает важный и пока что недооцененный инструментарий для повышения качества бухгалтерского учета и отчетности.</p>
+
+<div class="essay-refs">
+<p><b>Список литературы:</b></p>
+<p>1. Климов Е.А. Психология профессионального самоопределения. — М.: Академия, 2010.</p>
+<p>2. Зеер Э.Ф. Психология профессий. — М.: Академический проект, 2015.</p>
+<p>3. Маркова А.К. Психология профессионализма. — М.: Международный гуманитарный фонд «Знание», 1996.</p>
+<p>4. Канеман Д. Думай медленно... Решай быстро. — М.: АСТ, 2014.</p>
+<p>5. Герцберг Ф. Мотивация к работе. — М.: Вершина, 2007.</p>
+<p>6. Маслач К. Профессиональное выгорание: как люди справляются. — СПб.: Питер, 2011.</p>
+<p>7. Бодров В.А. Психология профессиональной пригодности. — М.: ПЕР СЭ, 2001.</p>
+<p>8. Эдмондсон А. Психологическая безопасность в организациях // Harvard Business Review, 2020.</p>
+</div>
+</div>
+
+<div class="footer">Блок 1, вариант 2 — авторские схемы • Психология профессиональной деятельности</div>
+
+<script>
+const schemes = document.querySelectorAll('.scheme');
+const container = document.getElementById('schemesContainer');
+const empty = document.getElementById('emptyState');
+const essaySection = document.getElementById('essaySection');
+const sel = document.getElementById('sel');
+const counter = document.getElementById('counter');
+const prevBtn = document.getElementById('prevBtn');
+const nextBtn = document.getElementById('nextBtn');
+const essayBtn = document.getElementById('essayBtn');
+let currentIdx = -1;
+let essayView = false;
+
+schemes.forEach((s, i) => {
+const title = s.querySelector('.title').textContent;
+var opt = document.createElement('option');
+opt.value = i;
+opt.text = (i+1) + '. ' + title;
+sel.appendChild(opt);
+});
+
+function hideAllViews() {
+schemes.forEach(s => { s.classList.remove('active'); s.style.display = ''; });
+essaySection.classList.remove('active');
+essaySection.style.display = '';
+empty.style.display = 'none';
+essayBtn.classList.remove('active');
+essayBtn.textContent = '📝 Эссе';
+essayView = false;
+}
+
+function showScheme(idx) {
+hideAllViews();
+if (idx < 0 || idx >= schemes.length) { showEmpty(); return; }
+currentIdx = idx;
+var target = schemes[idx];
+target.classList.add('active');
+target.style.display = 'block';
+counter.textContent = (idx+1) + ' / ' + schemes.length;
+sel.value = idx;
+prevBtn.disabled = idx === 0;
+nextBtn.disabled = idx === schemes.length - 1;
+history.replaceState(null, '', '#' + (idx+1));
+document.querySelector('.controls').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function showEmpty() {
+hideAllViews();
+empty.style.display = 'block';
+counter.textContent = '';
+prevBtn.disabled = true;
+nextBtn.disabled = true;
+sel.value = '';
+}
+
+function showEssay() {
+hideAllViews();
+essaySection.classList.add('active');
+essaySection.style.display = 'block';
+counter.textContent = '';
+sel.value = '';
+prevBtn.disabled = true;
+nextBtn.disabled = true;
+essayBtn.classList.add('active');
+essayBtn.textContent = '📖 Назад к схемам';
+essayView = true;
+history.replaceState(null, '', '#essay');
+document.querySelector('.controls').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+sel.addEventListener('change', function() {
+var v = this.value;
+if (v === '') showEmpty();
+else showScheme(parseInt(v));
+});
+
+prevBtn.addEventListener('click', function() { if (currentIdx > 0) showScheme(currentIdx - 1); });
+nextBtn.addEventListener('click', function() { if (currentIdx < schemes.length - 1) showScheme(currentIdx + 1); });
+
+essayBtn.addEventListener('click', function() {
+if (essayView) { showEmpty(); }
+else { showEssay(); }
+});
+
+document.addEventListener('keydown', function(e) {
+if (currentIdx < 0) return;
+if (e.key === 'ArrowLeft' && currentIdx > 0) showScheme(currentIdx - 1);
+if (e.key === 'ArrowRight' && currentIdx < schemes.length - 1) showScheme(currentIdx + 1);
+});
+
+window.addEventListener('load', function() {
+var hash = window.location.hash.slice(1);
+if (hash === 'essay') { showEssay(); }
+else if (hash) { var i = parseInt(hash)-1; if (i >= 0 && i < schemes.length) showScheme(i); else showEmpty(); }
+else showEmpty();
+});
+</script>
+</body>
+</html>
